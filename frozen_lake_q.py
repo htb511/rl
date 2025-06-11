@@ -3,12 +3,15 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 
+# link: https://www.gymlibrary.dev/environments/toy_text/frozen_lake/
+# Frozen Lake environment
 # states: 0-15
 # action: 0-left, 1-down, 2-right, 3-left
+# reward: 0 for normal states, 1 for reaching goal, 0 for falling into hole
 
 def run(episodes, is_traning=True):
 
-    env = gym.make('FrozenLake-v1', render_mode='human' if not is_traning else None)
+    env = gym.make('FrozenLake-v1', map_name="4x4", is_slippery=True, render_mode='human' if not is_traning else None)
 
     # define q-learning table
     if is_traning:
@@ -18,11 +21,13 @@ def run(episodes, is_traning=True):
         q = pickle.load(f)
         f.close()
 
+    print(f"q table: \n{q}")
+
     learning_rate = 0.9
     discounted_factor = 0.9
 
     epsilon = 1
-    epsilon_decay = 0.99
+    epsilon_decay = 0.0001
     rng = np.random.default_rng()
 
     reward_per_episode = np.zeros(episodes)
@@ -50,7 +55,7 @@ def run(episodes, is_traning=True):
             total_reward += reward
             num_steps += 1
 
-        epsilon = epsilon*epsilon_decay
+        epsilon = max(epsilon-epsilon_decay, 0)
 
         if epsilon == 0:
             learning_rate = 0.0001
@@ -75,4 +80,6 @@ def run(episodes, is_traning=True):
         f.close()
 
 if __name__ == '__main__':
-    run(10000, is_traning=False)
+    run(10000)
+    run(10, is_traning=False)
+
